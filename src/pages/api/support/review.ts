@@ -8,8 +8,8 @@ import {
 } from "../../../lib/support-cc";
 import { verifyReviewToken } from "../../../lib/support-review-token";
 
-const SITE_ID = "master-carpenters";
-const SITE_HOST = "mastercarpentersllc.com";
+const SITE_ID = "matthew-peiper";
+const SITE_HOST = "matthewpeiper.com";
 
 /** Staging hosts allowed to call this endpoint from the browser bar. */
 const ALLOWED_ORIGINS = new Set([
