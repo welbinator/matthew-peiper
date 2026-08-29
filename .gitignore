@@ -1,0 +1,12 @@
+node_modules/
+dist/
+data.db
+data.db.bak
+*.db-shm
+*.db-wal
+uploads/
+.astro/
+.vite/
+.env*
+.wrangler/
+.DS_Store

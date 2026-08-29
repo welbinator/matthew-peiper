@@ -1,0 +1,128 @@
+---
+import site from "../data/site.json";
+import { withBase } from "../lib/base";
+import StagingReviewBar from "../components/StagingReviewBar.astro";
+import "../styles/site.css";
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: string;
+	/** Private pages (client support portal) — never index. */
+	noindex?: boolean;
+	/** Standalone pages (support portal) — render without site header. */
+	bare?: boolean;
+	/** Home page uses a transparent fixed header over the hero. */
+	transparentHeader?: boolean;
+}
+
+const {
+	title,
+	description,
+	image,
+	noindex = false,
+	bare = false,
+	transparentHeader = false,
+} = Astro.props;
+const siteTitle = site.title;
+const fullTitle = title ? `${title} — ${siteTitle}` : siteTitle;
+const siteDescription = description || site.tagline;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const isStagingBuild =
+	Boolean(import.meta.env.BASE_URL && import.meta.env.BASE_URL !== "/");
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{fullTitle}</title>
+		<meta name="description" content={siteDescription} />
+		{noindex ? (
+			<meta name="robots" content="noindex, nofollow" />
+		) : (
+			<link rel="canonical" href={canonical} />
+		)}
+		{!noindex && (
+			<>
+				<meta property="og:title" content={fullTitle} />
+				<meta property="og:description" content={siteDescription} />
+				<meta property="og:type" content="website" />
+				<meta property="og:url" content={canonical} />
+				{image && <meta property="og:image" content={image} />}
+				<meta name="twitter:card" content="summary_large_image" />
+			</>
+		)}
+		<link rel="preload" href={withBase("/fonts/cormorant-garamond-300.woff2")} as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href={withBase("/fonts/montserrat-500.woff2")} as="font" type="font/woff2" crossorigin />
+	</head>
+	<body>
+		{!bare && (
+		<header class:list={["header", { "header--solid": !transparentHeader }]} id="site-header">
+			<div class="header__inner">
+				<a href={withBase("/")} class="header__logo-link-wrapper" aria-label={siteTitle}></a>
+				<nav class="header__nav" id="site-nav" aria-label="Primary">
+					<ul class="header__nav-list">
+						{site.nav.map((item) => (
+							<li class="header__nav-item">
+								<a
+									href={withBase(item.url)}
+									class:list={["header__nav-link", { "header__nav-link--active": item.url === "/" ? currentPath === withBase("/") : false }]}
+								>{item.label}</a>
+							</li>
+						))}
+					</ul>
+				</nav>
+				<div class="header__actions">
+					<button class="header__hamburger-btn header__hamburger-btn--mobile-menu" id="nav-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">
+						<svg class="header__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+							<line x1="3" y1="6" x2="21" y2="6" />
+							<line x1="3" y1="12" x2="21" y2="12" />
+							<line x1="3" y1="18" x2="21" y2="18" />
+						</svg>
+					</button>
+				</div>
+			</div>
+		</header>
+		)}
+
+		<main id="main">
+			<slot />
+		</main>
+
+		{isStagingBuild && <StagingReviewBar />}
+
+		{!bare && (
+		<script>
+			// Solidify the header background once the user scrolls past the hero.
+			const header = document.getElementById('site-header');
+			const isHome = document.querySelector('.hero') !== null;
+			function onScroll() {
+				if (!header) return;
+				if (!isHome || window.scrollY > 40) header.classList.add('header--scrolled');
+				else header.classList.remove('header--scrolled');
+			}
+			if (!isHome && header) header.classList.add('header--scrolled');
+			window.addEventListener('scroll', onScroll, { passive: true });
+			onScroll();
+
+			// Mobile nav toggle.
+			const hamburger = document.getElementById('nav-hamburger');
+			const nav = document.getElementById('site-nav');
+			hamburger?.addEventListener('click', () => {
+				const open = nav?.classList.toggle('header__nav--open');
+				hamburger.setAttribute('aria-expanded', open ? 'true' : 'false');
+				hamburger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+			});
+			nav?.querySelectorAll('a').forEach((link) => {
+				link.addEventListener('click', () => {
+					nav.classList.remove('header__nav--open');
+					hamburger?.setAttribute('aria-expanded', 'false');
+				});
+			});
+		</script>
+		)}
+	</body>
+</html>

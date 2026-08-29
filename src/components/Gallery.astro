@@ -1,0 +1,98 @@
+---
+import { withBase } from "../lib/base";
+
+interface Piece {
+	slug: string;
+	title: string;
+	image: string;
+	available: boolean;
+	medium?: string;
+}
+
+interface Props {
+	id?: string;
+	sectionClass: string;
+	label: string;
+	heading: string;
+	pieces: Piece[];
+	footerHref?: string;
+	footerLabel?: string;
+}
+
+const {
+	id,
+	sectionClass,
+	label,
+	heading,
+	pieces,
+	footerHref,
+	footerLabel,
+} = Astro.props;
+---
+
+<section id={id} class={sectionClass}>
+	<div class="section-inner">
+		<p class="section-label">{label}</p>
+		<h2 class="featured-works__heading">{heading}</h2>
+		<div class="gallery-grid">
+			{pieces.map((piece) => (
+				<div class="gallery-grid__item" data-modal-src={`#modal-${sectionClass}-${piece.slug}`}>
+					<img
+						src={withBase(`/images/${piece.image}.webp`)}
+						alt={piece.title}
+						loading="lazy"
+						decoding="async"
+						class="gallery-grid__img"
+					/>
+					<div class="gallery-overlay">
+						<h3 class="gallery-overlay__title gallery-overlay__title--lg">{piece.title}</h3>
+						<div class="gallery-overlay__subtitle"></div>
+					</div>
+				</div>
+			))}
+		</div>
+		{footerHref && (
+			<div class="gallery-grid__footer">
+				<a href={withBase(footerHref)} class="gallery-grid__link">{footerLabel}</a>
+			</div>
+		)}
+	</div>
+</section>
+
+{pieces.map((piece) => (
+	<div
+		id={`modal-${sectionClass}-${piece.slug}`}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+		class="art-modal"
+		aria-label={piece.title}
+	>
+		<div class="art-modal__grid">
+			<div class="art-modal__media">
+				<img
+					src={withBase(`/images/${piece.image}.webp`)}
+					alt={piece.title}
+					decoding="async"
+					class="art-modal__img"
+				/>
+			</div>
+			<div class="art-modal__body">
+				<h2 class="art-modal__title">{piece.title}</h2>
+				<div class="art-modal__meta">
+					{piece.medium && <p class="art-modal__medium">{piece.medium}</p>}
+					<div class="gold-rule"></div>
+					<p class="art-modal__availability">
+						{piece.available ? "Available for purchase" : "Not currently available for purchase"}
+					</p>
+				</div>
+			</div>
+		</div>
+		<button type="button" aria-label="Close" class="art-modal__close">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="24" height="24" aria-hidden="true">
+				<line x1="6" y1="6" x2="18" y2="18" />
+				<line x1="18" y1="6" x2="6" y2="18" />
+			</svg>
+		</button>
+	</div>
+))}

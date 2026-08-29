@@ -1,0 +1,21 @@
+{
+  "name": "matthew-peiper",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "matthew-peiper-db",
+      "database_id": "a9023dfe-09f5-4ada-8556-5c7ca855015a"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "SESSION",
+      "id": "6057d0e1ddc249c78025fbb6a4aaa8ac"
+    }
+  ],
+  "assets": {
+    "directory": "./dist"
+  }
+}

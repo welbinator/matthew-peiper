@@ -1,0 +1,256 @@
+---
+import Base from "../layouts/Base.astro";
+import Gallery from "../components/Gallery.astro";
+import { withBase } from "../lib/base";
+import artwork from "../data/artwork.json";
+
+const commercial = artwork.pieces.filter((p) => p.category === "commercial-work");
+// The live site shows the same body of work across all three sections.
+const pieces = commercial;
+---
+
+<Base transparentHeader>
+	<!-- ===== Hero ===== -->
+	<section class="hero" id="home">
+		<div class="hero__bg">
+			<div class="hero__bg-overlay"></div>
+			<video
+				class="hero__bg-video hero__bg-img"
+				autoplay
+				muted
+				loop
+				playsinline
+				preload="auto"
+				poster={withBase("/video/hero-poster.webp")}
+			>
+				<source src={withBase("/video/hero.webm")} type="video/webm" />
+				<source src={withBase("/video/hero.mp4")} type="video/mp4" />
+			</video>
+			<img
+				class="hero__bg-placeholder hero__bg-img"
+				src={withBase("/video/hero-poster.webp")}
+				alt=""
+				aria-hidden="true"
+			/>
+		</div>
+		<img class="hero__watermark" src={withBase("/images/horse-bg.webp")} alt="" aria-hidden="true" />
+		<div class="hero__content">
+			<div class="hero__inner">
+				<img class="hero__signature" src={withBase("/images/signature.webp")} alt="Matthew Peiper" width="526" height="768" />
+				<div class="hero__actions">
+					<a href="#commercial-art" class="hero__btn hero__btn--outline">View Portfolio</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- ===== Commercial Work ===== -->
+	<Gallery
+		id="commercial-art"
+		sectionClass="commercial-work"
+		label="My Portfolio"
+		heading="Commercial Work"
+		pieces={pieces}
+	/>
+
+	<!-- ===== Featured Works (hidden for now) ===== -->
+	{false && (
+	<Gallery
+		id="featured-works"
+		sectionClass="featured-works"
+		label="Selected"
+		heading="Featured Works"
+		pieces={pieces}
+	/>
+	)}
+
+	<!-- ===== Fine Art (hidden for now) ===== -->
+	{false && (
+	<Gallery
+		id="fine-art"
+		sectionClass="fine-art"
+		label="Originals"
+		heading="Fine Art"
+		pieces={pieces}
+		footerHref="/artwork"
+		footerLabel="View all artwork"
+	/>
+	)}
+
+	<!-- ===== Contact ===== -->
+	<section class="contact" id="contact">
+		<div class="section-inner">
+			<div class="contact__grid">
+				<div class="contact__left">
+					<img class="contact__sig-img" src={withBase("/images/signature.webp")} alt="Matthew Peiper" />
+					<p class="contact__desc">
+						Interested in a piece, a commission, or working together on a brand
+						illustration project? Send a note and Matthew will get back to you.
+					</p>
+				</div>
+				<div class="contact__right">
+					<form class="contact-form" id="contact-form" data-api={withBase("/api/contact")} novalidate>
+						<div class="contact-form__group-row">
+							<div class="contact-form__group">
+								<label class="contact-form__label" for="firstname">First Name</label>
+								<input class="contact-form__input" type="text" id="firstname" name="firstname" required />
+							</div>
+							<div class="contact-form__group">
+								<label class="contact-form__label" for="lastname">Last Name</label>
+								<input class="contact-form__input" type="text" id="lastname" name="lastname" />
+							</div>
+						</div>
+						<div class="contact-form__group">
+							<label class="contact-form__label" for="email">Email</label>
+							<input class="contact-form__input" type="email" id="email" name="email" required />
+						</div>
+						<div class="contact-form__group">
+							<label class="contact-form__label" for="subject">Subject</label>
+							<input class="contact-form__input" type="text" id="subject" name="subject" />
+						</div>
+						<div class="contact-form__group">
+							<label class="contact-form__label" for="message">Message</label>
+							<textarea class="contact-form__textarea" id="message" name="message" rows="4"></textarea>
+						</div>
+						<input type="text" name="website_hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;" />
+						<div class="cf-turnstile" data-sitekey="0x4AAAAAAEetWlljYo-fyQC0" data-theme="dark"></div>
+						<button class="contact-form__submit" type="submit">Send Message</button>
+						<p class="contact-form__status" id="contact-status" role="status" aria-live="polite" hidden></p>
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</Base>
+
+<script>
+	// ── Hero video: fade in when it can play, hide placeholder once playing ──
+	const video = document.querySelector<HTMLVideoElement>(".hero__bg-video");
+	if (video) {
+		video.addEventListener("canplay", () => video.classList.add("loaded"));
+		video.addEventListener("timeupdate", () => {
+			if (video.currentTime > 0.1 && !video.classList.contains("playing")) {
+				video.classList.add("playing");
+			}
+		});
+		video.addEventListener("loadedmetadata", () => {
+			if (video.paused) video.play().catch(() => {});
+		});
+	}
+
+	// ── Art modals ──
+	const backdrop = document.createElement("div");
+	backdrop.classList.add("art-modal-backdrop");
+	backdrop.style.display = "none";
+	document.body.appendChild(backdrop);
+
+	const modals = Array.from(document.querySelectorAll<HTMLElement>(".art-modal"));
+	// Move modals to body so overflow:hidden sections don't clip them.
+	modals.forEach((m) => document.body.appendChild(m));
+
+	function openModal(modal: HTMLElement) {
+		modal.classList.remove("art-modal--closing");
+		modal.classList.add("art-modal--open");
+		backdrop.style.display = "block";
+		backdrop.setAttribute("data-state", "open");
+		document.body.style.overflow = "hidden";
+		const closeBtn = modal.querySelector<HTMLButtonElement>(".art-modal__close");
+		closeBtn?.focus();
+	}
+
+	function closeModal(modal: HTMLElement) {
+		modal.classList.remove("art-modal--open");
+		modal.classList.add("art-modal--closing");
+		backdrop.setAttribute("data-state", "closed");
+		setTimeout(() => {
+			modal.classList.remove("art-modal--closing");
+			backdrop.style.display = "none";
+			document.body.style.overflow = "";
+		}, 700);
+	}
+
+	document.querySelectorAll<HTMLElement>(".gallery-grid__item").forEach((item) => {
+		const sel = item.getAttribute("data-modal-src");
+		if (!sel) return;
+		const modal = document.querySelector<HTMLElement>(sel);
+		if (!modal) return;
+		item.addEventListener("click", () => openModal(modal));
+		const closeBtn = modal.querySelector<HTMLButtonElement>(".art-modal__close");
+		closeBtn?.addEventListener("click", (e) => {
+			e.stopPropagation();
+			closeModal(modal);
+		});
+	});
+
+	backdrop.addEventListener("click", () => {
+		const open = document.querySelector<HTMLElement>(".art-modal--open");
+		if (open) closeModal(open);
+	});
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape") {
+			const open = document.querySelector<HTMLElement>(".art-modal--open");
+			if (open) closeModal(open);
+		}
+	});
+
+	// ── Contact form ──
+	const form = document.getElementById("contact-form") as HTMLFormElement | null;
+	const status = document.getElementById("contact-status");
+	form?.addEventListener("submit", async (e) => {
+		e.preventDefault();
+		if (!status) return;
+		const btn = form.querySelector<HTMLButtonElement>(".contact-form__submit");
+		const fd = new FormData(form);
+		const first = String(fd.get("firstname") || "").trim();
+		const last = String(fd.get("lastname") || "").trim();
+		const payload = {
+			name: [first, last].filter(Boolean).join(" "),
+			email: String(fd.get("email") || "").trim(),
+			project: String(fd.get("subject") || "").trim(),
+			message: String(fd.get("message") || "").trim(),
+			website_hp: String(fd.get("website_hp") || ""),
+			"cf-turnstile-response": String(fd.get("cf-turnstile-response") || ""),
+		};
+		status.hidden = true;
+		if (!payload.name || !payload.email) {
+			status.hidden = false;
+			status.textContent = "Please enter your name and email.";
+			status.className = "contact-form__status contact-form__status--err";
+			return;
+		}
+		if (!payload["cf-turnstile-response"]) {
+			status.hidden = false;
+			status.textContent = "Please complete the anti-spam check below.";
+			status.className = "contact-form__status contact-form__status--err";
+			return;
+		}
+		if (btn) { btn.disabled = true; btn.textContent = "Sending…"; }
+		try {
+			const res = await fetch(form.dataset.api || "/api/contact", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(payload),
+			});
+			const data = await res.json().catch(() => ({ ok: res.ok }));
+			status.hidden = false;
+			if (data.ok) {
+				status.textContent = "Thank you — your message has been sent.";
+				status.className = "contact-form__status contact-form__status--ok";
+				form.reset();
+			} else {
+				status.textContent = data.error || "Something went wrong. Please try again.";
+				status.className = "contact-form__status contact-form__status--err";
+			}
+		} catch {
+			status.hidden = false;
+			status.textContent = "Network error. Please try again.";
+			status.className = "contact-form__status contact-form__status--err";
+		} finally {
+			if (btn) { btn.disabled = false; btn.textContent = "Send Message"; }
+			// Reset Turnstile so the next submission gets a fresh, unused token.
+			(window as any).turnstile?.reset?.();
+		}
+	});
+</script>

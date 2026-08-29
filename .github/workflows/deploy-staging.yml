@@ -1,0 +1,90 @@
+name: Deploy staging to GitHub Pages
+
+# Staging previewer for Matthew Peiper (static Astro).
+# Publishes the `staging` branch to GitHub Pages and injects no-index protection
+# at BUILD TIME so the noindex tag is never committed to any source file.
+# Merging staging → main can never leak the tag onto production (Model B).
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout staging
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (mounted under the Pages subpath)
+        run: npm run build
+        env:
+          # GitHub Pages project site: https://welbinator.github.io/matthew-peiper/
+          # Astro writes static HTML under dist/client/matthew-peiper/ when base is set.
+          # Production (Cloudflare root) builds without this var.
+          PAGES_BASE: /matthew-peiper/
+
+      - name: Locate static output
+        id: out
+        run: |
+          if [ -d dist/client/matthew-peiper ]; then
+            OUT=dist/client/matthew-peiper
+          elif [ -d dist/client ]; then
+            OUT=dist/client
+          else
+            OUT=dist
+          fi
+          echo "dir=$OUT" >> "$GITHUB_OUTPUT"
+          echo "Using output dir: $OUT"
+          ls -la "$OUT" | head -20
+
+      - name: Inject noindex meta tag into all built HTML files
+        run: |
+          OUT="${{ steps.out.outputs.dir }}"
+          find "$OUT" -name '*.html' -print0 \
+            | xargs -0 -I{} sed -i \
+              's#<head>#<head>\n<meta name="robots" content="noindex, nofollow">#I' {}
+          echo "Injected noindex into:"
+          grep -rl 'noindex' --include='*.html' "$OUT" || true
+
+      - name: Write blocking robots.txt
+        run: |
+          OUT="${{ steps.out.outputs.dir }}"
+          printf 'User-agent: *\nDisallow: /\n' > "$OUT/robots.txt"
+          echo "robots.txt now:"
+          cat "$OUT/robots.txt"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ steps.out.outputs.dir }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

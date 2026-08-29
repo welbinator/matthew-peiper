@@ -1,0 +1,11 @@
+{
+  "title": "Matthew Peiper",
+  "tagline": "Commercial artist & illustrator. Original artwork, brand illustration, and fine art.",
+  "location": "Iowa",
+  "nav": [
+    { "label": "Home", "url": "/" },
+    { "label": "Commercial Art", "url": "/#commercial-art" },
+    { "label": "All Artwork", "url": "/artwork" },
+    { "label": "Contact", "url": "/#contact" }
+  ]
+}

@@ -1,0 +1,81 @@
+---
+import Base from "../layouts/Base.astro";
+import Gallery from "../components/Gallery.astro";
+import artwork from "../data/artwork.json";
+
+const groups = artwork.categories
+	.map((cat) => ({
+		...cat,
+		pieces: artwork.pieces.filter((p) => p.category === cat.slug),
+	}))
+	.filter((g) => g.pieces.length > 0);
+---
+
+<Base
+	title="All Artwork"
+	description="Browse the full collection of Matthew Peiper's commercial illustration, brand artwork, and fine art."
+>
+	<div class="artwork-page">
+		{groups.map((g, i) => (
+			<Gallery
+				sectionClass={i % 2 === 0 ? "commercial-work" : "fine-art"}
+				label="Full Collection"
+				heading={g.label}
+				pieces={g.pieces}
+			/>
+		))}
+	</div>
+</Base>
+
+<style>
+	/* Push content below the fixed header on this non-hero page. */
+	.artwork-page :global(section:first-child) { padding-top: 9rem; }
+</style>
+
+<script>
+	const backdrop = document.createElement("div");
+	backdrop.classList.add("art-modal-backdrop");
+	backdrop.style.display = "none";
+	document.body.appendChild(backdrop);
+
+	const modals = Array.from(document.querySelectorAll<HTMLElement>(".art-modal"));
+	modals.forEach((m) => document.body.appendChild(m));
+
+	function openModal(modal: HTMLElement) {
+		modal.classList.remove("art-modal--closing");
+		modal.classList.add("art-modal--open");
+		backdrop.style.display = "block";
+		document.body.style.overflow = "hidden";
+	}
+	function closeModal(modal: HTMLElement) {
+		modal.classList.remove("art-modal--open");
+		modal.classList.add("art-modal--closing");
+		setTimeout(() => {
+			modal.classList.remove("art-modal--closing");
+			backdrop.style.display = "none";
+			document.body.style.overflow = "";
+		}, 700);
+	}
+
+	document.querySelectorAll<HTMLElement>(".gallery-grid__item").forEach((item) => {
+		const sel = item.getAttribute("data-modal-src");
+		if (!sel) return;
+		const modal = document.querySelector<HTMLElement>(sel);
+		if (!modal) return;
+		item.addEventListener("click", () => openModal(modal));
+		modal.querySelector<HTMLButtonElement>(".art-modal__close")?.addEventListener("click", (e) => {
+			e.stopPropagation();
+			closeModal(modal);
+		});
+	});
+	backdrop.addEventListener("click", () => {
+		const open = document.querySelector<HTMLElement>(".art-modal--open");
+		if (open) closeModal(open);
+	});
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape") {
+			const open = document.querySelector<HTMLElement>(".art-modal--open");
+			if (open) closeModal(open);
+		}
+	});
+</script>

@@ -1,0 +1,65 @@
+{
+  "categories": [
+    { "slug": "commercial-work", "label": "Commercial Work" },
+    { "slug": "featured-work", "label": "Featured Work" },
+    { "slug": "fine-art", "label": "Fine Art" }
+  ],
+  "pieces": [
+    {
+      "slug": "cyclone",
+      "title": "Cyclone",
+      "image": "cyclone",
+      "category": "commercial-work",
+      "available": false
+    },
+    {
+      "slug": "flexzilla-hose-display",
+      "title": "FlexZilla \u2013 Hose Display",
+      "image": "flexzilla-hose-display",
+      "category": "commercial-work",
+      "available": false
+    },
+    {
+      "slug": "flexzilla-product-line",
+      "title": "FlexZilla \u2013 Product Line",
+      "image": "flexzilla-product-line",
+      "category": "commercial-work",
+      "available": false
+    },
+    {
+      "slug": "flexzilla-water",
+      "title": "FlexZilla \u2013 Water",
+      "image": "flexzilla-water",
+      "category": "commercial-work",
+      "available": false
+    },
+    {
+      "slug": "cedar-river-glassworks",
+      "title": "Cedar River Glassworks",
+      "image": "cedar-river-glassworks",
+      "category": "commercial-work",
+      "available": false
+    },
+    {
+      "slug": "friends-of-internationals",
+      "title": "Friends of Internationals",
+      "image": "friends-of-internationals",
+      "category": "commercial-work",
+      "available": false
+    },
+    {
+      "slug": "matt-wheeler-studios",
+      "title": "Matt Wheeler Studios",
+      "image": "matt-wheeler-studios",
+      "category": "commercial-work",
+      "available": false
+    },
+    {
+      "slug": "samari10",
+      "title": "Samari10",
+      "image": "samari10",
+      "category": "commercial-work",
+      "available": false
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+/*
+  theme.css — Matthew Peiper portfolio brand overrides.
+  Dark-only commercial-artist aesthetic matching the live site:
+  charcoal backgrounds, warm off-white text, muted gold accent,
+  Cormorant Garamond serif headings + Montserrat body.
+  Values mirror the source WordPress theme's design tokens
+  (bg hsl(0 0% 10.2%), gold hsl(43 49% 54.1%), text hsl(40 25% 93.3%)).
+*/
+
+:root {
+	/* Force a single dark palette regardless of light/dark mode */
+	--color-bg:      #1a1a1a;   /* hsl(0 0% 10.2%)  */
+	--color-surface: #212121;   /* hsl(0 0% 13%)    */
+	--color-border:  #383838;   /* hsl(0 0% 22%)    */
+	--color-text:    #f2efea;   /* hsl(40 25% 93.3%) */
+	--color-muted:   #8a8a8a;   /* hsl(0 0% 54.1%)  */
+
+	/* Muted gold accent — hsl(43 49% 54.1%) */
+	--color-brand:        #c3a351;
+	--color-brand-strong: #d4b768;
+	--color-brand-soft:   #d4b768;
+	--color-accent:       #c3a351;
+	--color-accent-soft:  #d4b768;
+	--color-on-brand:     #1a1a1a;
+
+	/* Flat — no gradients (client preference) */
+	--gradient-brand:        var(--color-brand);
+	--gradient-brand-strong: var(--color-brand);
+	--gradient-brand-soft:   var(--color-surface);
+	--gradient-headline:     var(--color-text);
+
+	/* Typography — serif display (--font-heading set by font pipeline), sans body */
+	--font-weight-heading: 500;
+	--font-weight-display: 600;
+	--tracking-snug: 0;
+}
+
+/* Lock in dark scheme even if a stray theme cookie is set */
+:root, :root.light, :root.dark {
+	color-scheme: dark;
+}
+
+/* Logo — signature image wordmark, plain */
+.site-logo {
+	background: none !important;
+	-webkit-text-fill-color: unset !important;
+	color: var(--color-text) !important;
+}
+
+/* Gold-outline buttons matching the live "VIEW PORTFOLIO" style */
+.btn-primary {
+	background: transparent !important;
+	color: var(--color-brand) !important;
+	border: 1px solid var(--color-brand) !important;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	font-size: var(--font-size-xs);
+}
+.btn-primary:hover {
+	background: var(--color-brand) !important;
+	color: var(--color-on-brand) !important;
+	box-shadow: none !important;
+}
+
+/* Small-caps letter-spaced section labels */
+.eyebrow {
+	display: inline-block;
+	font-size: var(--font-size-xs);
+	font-weight: 600;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--color-brand);
+}
