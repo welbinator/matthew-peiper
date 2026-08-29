@@ -1,6 +1,6 @@
 {
   "categories": [
-    { "slug": "commercial-work", "label": "Commercial" },
+    { "slug": "commercial-work", "label": "Commercial Work" },
     { "slug": "featured-work", "label": "Featured Work" },
     { "slug": "fine-art", "label": "Fine Art" }
   ],
