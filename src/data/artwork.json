@@ -45,6 +45,7 @@
       "title": "Friends of Internationals",
       "image": "friends-of-internationals",
       "category": "commercial-work",
+      "medium": "Logo for a charitable organization serving international students studying on American college campuses.",
       "available": false
     },
     {
@@ -59,6 +60,7 @@
       "title": "Samari10",
       "image": "samari10",
       "category": "commercial-work",
+      "medium": "Logo for a payment processing partner which donates 10% of all purchases to designated charities.",
       "available": false
     }
   ]
