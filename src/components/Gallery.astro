@@ -7,6 +7,8 @@ interface Piece {
 	image: string;
 	available: boolean;
 	medium?: string;
+	uppercaseTitle?: boolean;
+	hideAvailability?: boolean;
 }
 
 interface Props {
@@ -78,13 +80,15 @@ const {
 				/>
 			</div>
 			<div class="art-modal__body">
-				<h2 class="art-modal__title">{piece.title}</h2>
+				<h2 class="art-modal__title">{piece.uppercaseTitle ? piece.title.toUpperCase() : piece.title}</h2>
 				<div class="art-modal__meta">
 					{piece.medium && <p class="art-modal__medium">{piece.medium}</p>}
 					<div class="gold-rule"></div>
-					<p class="art-modal__availability">
-						{piece.available ? "Available for purchase" : "Not currently available for purchase"}
-					</p>
+					{!piece.hideAvailability && (
+						<p class="art-modal__availability">
+							{piece.available ? "Available for purchase" : "Not currently available for purchase"}
+						</p>
+					)}
 				</div>
 			</div>
 		</div>
