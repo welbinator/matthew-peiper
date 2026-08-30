@@ -4,6 +4,7 @@
 type Env = {
 	DB: D1Database;
 	SESSION: KVNamespace;
+	SUPPORT_UPLOADS: R2Bucket;
 	PUSH_NOTIFY_SECRET?: string;
 	CC_NOTIFY_URL?: string;
 	CC_SUPPORT_URL?: string;

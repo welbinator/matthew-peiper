@@ -46,7 +46,8 @@
       "image": "friends-of-internationals",
       "category": "commercial-work",
       "medium": "Logo for a charitable organization serving international students studying on American college campuses.",
-      "available": false
+      "available": false,
+      "hideAvailability": true
     },
     {
       "slug": "matt-wheeler-studios",
@@ -61,7 +62,9 @@
       "image": "samari10",
       "category": "commercial-work",
       "medium": "Logo for a payment processing partner which donates 10% of all purchases to designated charities.",
-      "available": false
+      "available": false,
+      "uppercaseTitle": true,
+      "hideAvailability": true
     }
   ]
 }

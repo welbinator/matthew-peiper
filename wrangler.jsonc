@@ -15,6 +15,12 @@
       "id": "6057d0e1ddc249c78025fbb6a4aaa8ac"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "SUPPORT_UPLOADS",
+      "bucket_name": "matthew-peiper-support-uploads"
+    }
+  ],
   "assets": {
     "directory": "./dist"
   }

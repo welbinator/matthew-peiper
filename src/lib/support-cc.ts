@@ -13,14 +13,20 @@ async function hmacHex(secret: string, msg: string): Promise<string> {
 }
 
 function supportNotifyUrl(): string {
-	return (
-		(env as Record<string, string | undefined>).CC_SUPPORT_URL ||
-		(env as Record<string, string | undefined>).CC_NOTIFY_URL?.replace(
-			/\/api\/push\/notify$/,
-			"/api/support/notify"
-		) ||
-		"https://cc.crweb.design/api/support/notify"
-	);
+	const e = env as Record<string, string | undefined>;
+	// Prefer an explicit support URL. Otherwise derive from CC_NOTIFY_URL by
+	// swapping ANY trailing /api/.../notify (or bare host) to /api/support/notify.
+	// The old code only matched an exact /api/push/notify suffix; if CC_NOTIFY_URL
+	// differed at all, the replace was a no-op and approvals POSTed to the wrong
+	// path and were silently swallowed by postSigned's catch{}. (root cause Aug30)
+	if (e.CC_SUPPORT_URL) return e.CC_SUPPORT_URL;
+	const base = e.CC_NOTIFY_URL;
+	if (base) {
+		// strip any /api/<seg>/notify tail, else any trailing slash, then append
+		const root = base.replace(/\/api\/[^/]+\/notify\/?$/, "").replace(/\/+$/, "");
+		return `${root}/api/support/notify`;
+	}
+	return "https://cc.crweb.design/api/support/notify";
 }
 
 async function postSigned(payload: Record<string, unknown>): Promise<void> {
@@ -45,6 +51,13 @@ async function postSigned(payload: Record<string, unknown>): Promise<void> {
 	}
 }
 
+export type SupportAttachmentMeta = {
+	id: string;
+	filename: string;
+	content_type: string;
+	size_bytes: number;
+};
+
 export type SupportTicketNotify = {
 	id: string;
 	site_id: string;
@@ -57,6 +70,7 @@ export type SupportTicketNotify = {
 	status?: string;
 	created_at: string;
 	message_id?: string;
+	attachments?: SupportAttachmentMeta[];
 };
 
 /** Fire-and-forget new-ticket webhook to Command Center. */
@@ -74,6 +88,7 @@ export async function notifySupportTicket(ticket: SupportTicketNotify): Promise<
 		status: ticket.status || "new",
 		created_at: ticket.created_at,
 		message_id: ticket.message_id || "",
+		attachments: ticket.attachments || [],
 	});
 }
 
@@ -87,6 +102,7 @@ export type SupportMessageNotify = {
 	user_email: string;
 	user_name: string;
 	created_at: string;
+	attachments?: SupportAttachmentMeta[];
 };
 
 /** Fire-and-forget client reply webhook to Command Center. */
@@ -103,6 +119,7 @@ export async function notifySupportMessage(msg: SupportMessageNotify): Promise<v
 		user_email: msg.user_email,
 		user_name: msg.user_name,
 		created_at: msg.created_at,
+		attachments: msg.attachments || [],
 	});
 }
 

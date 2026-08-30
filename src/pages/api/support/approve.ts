@@ -5,8 +5,8 @@ import { env } from "cloudflare:workers";
 import { requireUser } from "../../../lib/support-auth";
 import { notifySupportApproval } from "../../../lib/support-cc";
 
-const SITE_ID = "master-carpenters";
-const SITE_HOST = "mastercarpentersllc.com";
+const SITE_ID = "matthew-peiper";
+const SITE_HOST = "matthewpeiper.com";
 
 function json(data: unknown, status = 200) {
 	return new Response(JSON.stringify(data), {
