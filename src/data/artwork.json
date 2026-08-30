@@ -45,7 +45,9 @@
       "title": "Friends of Internationals",
       "image": "friends-of-internationals",
       "category": "commercial-work",
-      "available": false
+      "medium": "Logo for a charitable organization serving international students studying on American college campuses.",
+      "available": false,
+      "hideAvailability": true
     },
     {
       "slug": "matt-wheeler-studios",
