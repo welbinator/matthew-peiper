@@ -98,6 +98,34 @@ export const GET: APIRoute = async ({ request }) => {
 		}
 
 		const { user_id: _uid, ...publicTicket } = ticket;
+
+		// Attach attachment metadata (grouped by message) for the thread UI.
+		const attRows =
+			(
+				await db
+					.prepare(
+						`SELECT id, message_id, filename, content_type, size_bytes
+						 FROM support_attachments
+						 WHERE ticket_id = ?
+						 ORDER BY created_at ASC`
+					)
+					.bind(id)
+					.all()
+			).results || [];
+		const byMsg: Record<string, unknown[]> = {};
+		for (const a of attRows as Array<Record<string, unknown>>) {
+			const mid = String(a.message_id || "");
+			(byMsg[mid] ||= []).push({
+				id: a.id,
+				filename: a.filename,
+				content_type: a.content_type,
+				size_bytes: a.size_bytes,
+			});
+		}
+		for (const m of messages as Array<Record<string, unknown>>) {
+			m.attachments = byMsg[String(m.id)] || [];
+		}
+
 		return json({ ok: true, ticket: publicTicket, messages });
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);

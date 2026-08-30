@@ -4,9 +4,10 @@ import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { makeId, requireUser } from "../../../lib/support-auth";
 import { notifySupportMessage } from "../../../lib/support-cc";
+import { collectValidFiles, storeFiles } from "../../../lib/support-uploads";
 
-const SITE_ID = "master-carpenters";
-const SITE_HOST = "mastercarpentersllc.com";
+const SITE_ID = "matthew-peiper";
+const SITE_HOST = "matthewpeiper.com";
 
 function json(data: unknown, status = 200) {
 	return new Response(JSON.stringify(data), {
@@ -25,17 +26,39 @@ export const POST: APIRoute = async ({ request }) => {
 	const user = await requireUser(request);
 	if (!user) return json({ ok: false, error: "Not authenticated" }, 401);
 
-	let body: Record<string, unknown>;
-	try {
-		body = await request.json();
-	} catch {
-		return json({ ok: false, error: "Invalid JSON" }, 400);
+	let ticketId = "";
+	let text = "";
+	let files: File[] = [];
+
+	const ctype = request.headers.get("content-type") || "";
+	if (ctype.includes("multipart/form-data")) {
+		let form: FormData;
+		try {
+			form = await request.formData();
+		} catch {
+			return json({ ok: false, error: "Invalid form data" }, 400);
+		}
+		ticketId = clean(form.get("ticket_id") || form.get("id"), 80);
+		text = clean(form.get("body") || form.get("message"), 8000);
+		const check = collectValidFiles(form);
+		if (!check.ok) return json({ ok: false, error: check.error }, 422);
+		files = check.files;
+	} else {
+		let body: Record<string, unknown>;
+		try {
+			body = await request.json();
+		} catch {
+			return json({ ok: false, error: "Invalid JSON" }, 400);
+		}
+		ticketId = clean(body.ticket_id || body.id, 80);
+		text = clean(body.body || body.message, 8000);
 	}
 
-	const ticketId = clean(body.ticket_id || body.id, 80);
-	const text = clean(body.body || body.message, 8000);
 	if (!ticketId) return json({ ok: false, error: "ticket_id required" }, 422);
-	if (!text) return json({ ok: false, error: "Message is required" }, 422);
+	// A reply may be text, files, or both — but not empty.
+	if (!text && files.length === 0) {
+		return json({ ok: false, error: "Message is required" }, 422);
+	}
 
 	const db = env.DB;
 	if (!db) return json({ ok: false, error: "Database unavailable" }, 500);
@@ -53,16 +76,29 @@ export const POST: APIRoute = async ({ request }) => {
 
 	const msgId = makeId("msg");
 	const now = new Date().toISOString();
+	const bodyText = text || "(sent attachment)";
+
+	// Store files in R2 before the DB write.
+	let stored: Awaited<ReturnType<typeof storeFiles>> = [];
+	if (files.length) {
+		try {
+			stored = await storeFiles(env.SUPPORT_UPLOADS, ticketId, files);
+		} catch (err) {
+			const msg = err instanceof Error ? err.message : String(err);
+			console.error("support upload store error:", msg);
+			return json({ ok: false, error: "Could not save attachments" }, 500);
+		}
+	}
 
 	try {
-		await db.batch([
+		const stmts = [
 			db
 				.prepare(
 					`INSERT INTO support_messages
 						(id, ticket_id, sender, author_name, body, created_at)
 					 VALUES (?, ?, 'client', ?, ?, ?)`
 				)
-				.bind(msgId, ticketId, user.name || user.email, text, now),
+				.bind(msgId, ticketId, user.name || user.email, bodyText, now),
 			db
 				.prepare(
 					`UPDATE support_tickets
@@ -71,13 +107,42 @@ export const POST: APIRoute = async ({ request }) => {
 					                   THEN 'in_progress' ELSE status END
 					 WHERE id = ?`
 				)
-				.bind(text, now, ticketId),
-		]);
+				.bind(bodyText, now, ticketId),
+		];
+		for (const a of stored) {
+			stmts.push(
+				db
+					.prepare(
+						`INSERT INTO support_attachments
+							(id, ticket_id, message_id, r2_key, filename, content_type, size_bytes, uploaded_by, created_at)
+						 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+					)
+					.bind(
+						a.id,
+						ticketId,
+						msgId,
+						a.r2_key,
+						a.filename,
+						a.content_type,
+						a.size_bytes,
+						user.email,
+						now
+					)
+			);
+		}
+		await db.batch(stmts);
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
 		console.error("support message insert error:", msg);
 		return json({ ok: false, error: "Could not send message" }, 500);
 	}
+
+	const attachmentsMeta = stored.map((a) => ({
+		id: a.id,
+		filename: a.filename,
+		content_type: a.content_type,
+		size_bytes: a.size_bytes,
+	}));
 
 	try {
 		await notifySupportMessage({
@@ -86,10 +151,11 @@ export const POST: APIRoute = async ({ request }) => {
 			site_id: SITE_ID,
 			site: SITE_HOST,
 			subject: ticket.subject,
-			body: text,
+			body: bodyText,
 			user_email: user.email,
 			user_name: user.name || "",
 			created_at: now,
+			attachments: attachmentsMeta,
 		});
 	} catch (err) {
 		console.warn("support message CC notify error:", err);
@@ -102,8 +168,9 @@ export const POST: APIRoute = async ({ request }) => {
 			ticket_id: ticketId,
 			sender: "client",
 			author_name: user.name || user.email,
-			body: text,
+			body: bodyText,
 			created_at: now,
+			attachments: attachmentsMeta,
 		},
 	});
 };
