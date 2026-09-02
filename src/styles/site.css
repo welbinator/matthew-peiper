@@ -242,6 +242,7 @@ h2 { font-size: 48px; font-weight: 300; }
   font-family: var(--font-body); font-size: 0.875rem; color: hsl(var(--muted-foreground));
   text-transform: uppercase; letter-spacing: 0.05em;
 }
+.art-modal__medium--normal { text-transform: none; letter-spacing: normal; }
 .gold-rule { width: 3rem; height: 1px; background-color: hsl(var(--primary)); margin: 1rem 0; }
 .art-modal__availability {
   font-family: var(--font-body); font-size: 0.875rem;
@@ -258,6 +259,35 @@ h2 { font-size: 48px; font-weight: 300; }
   opacity: 0; pointer-events: none; position: fixed; inset: 0; z-index: 49;
   background-color: hsl(0 0% 0% / 0.6); animation: backdrop-in 200ms ease;
 }
+
+/* ---- Modal image carousel ---- */
+.art-carousel { position: relative; width: 100%; height: 100%; }
+.art-carousel__track { width: 100%; height: 100%; }
+.art-carousel__slide[hidden] { display: none; }
+.art-carousel__nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  display: flex; align-items: center; justify-content: center;
+  width: 2.5rem; height: 2.5rem; padding: 0; cursor: pointer;
+  background-color: hsl(0 0% 0% / 0.45); color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border)); border-radius: 9999px;
+  opacity: 0.85; transition: opacity 150ms, background-color 150ms;
+}
+.art-carousel__nav:hover { opacity: 1; background-color: hsl(0 0% 0% / 0.7); }
+.art-carousel__nav:focus { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.art-carousel__nav--prev { left: 0.75rem; }
+.art-carousel__nav--next { right: 0.75rem; }
+.art-carousel__dots {
+  position: absolute; bottom: 0.75rem; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 0.5rem; padding: 0.4rem 0.6rem;
+  background-color: hsl(0 0% 0% / 0.4); border-radius: 9999px;
+}
+.art-carousel__dot {
+  width: 0.5rem; height: 0.5rem; padding: 0; cursor: pointer;
+  border: none; border-radius: 9999px; background-color: hsl(var(--muted-foreground) / 0.5);
+  transition: background-color 150ms;
+}
+.art-carousel__dot[aria-current="true"] { background-color: hsl(var(--primary)); }
+.art-carousel__dot:focus { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
 
 @keyframes modal-in { from { opacity: 0; transform: translate(-50%, -50%) scale(0.85); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 @keyframes modal-out { from { opacity: 1; transform: translate(-50%, -50%) scale(1); } to { opacity: 0; transform: translate(-50%, -50%) scale(0.85); } }

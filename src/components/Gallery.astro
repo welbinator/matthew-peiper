@@ -9,6 +9,12 @@ interface Piece {
 	medium?: string;
 	uppercaseTitle?: boolean;
 	hideAvailability?: boolean;
+	/** Optional multi-shot gallery. First entry is the main/displayed shot. */
+	images?: string[];
+	/** Override the availability line (e.g. "Available — $250 + Shipping"). */
+	availabilityText?: string;
+	/** Render the medium/description in normal case instead of the default uppercase. */
+	mediumNormalCase?: boolean;
 }
 
 interface Props {
@@ -72,21 +78,54 @@ const {
 	>
 		<div class="art-modal__grid">
 			<div class="art-modal__media">
-				<img
-					src={withBase(`/images/${piece.image}.webp`)}
-					alt={piece.title}
-					decoding="async"
-					class="art-modal__img"
-				/>
+				{piece.images && piece.images.length > 1 ? (
+					<div class="art-carousel" data-carousel>
+						<div class="art-carousel__track">
+							{piece.images.map((img, i) => (
+								<img
+									src={withBase(`/images/${img}.webp`)}
+									alt={`${piece.title} — view ${i + 1}`}
+									decoding="async"
+									loading={i === 0 ? undefined : "lazy"}
+									class="art-modal__img art-carousel__slide"
+									data-slide={i}
+									hidden={i !== 0}
+								/>
+							))}
+						</div>
+						<button type="button" class="art-carousel__nav art-carousel__nav--prev" aria-label="Previous image" data-carousel-prev>
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="24" height="24" aria-hidden="true"><polyline points="15 18 9 12 15 6" /></svg>
+						</button>
+						<button type="button" class="art-carousel__nav art-carousel__nav--next" aria-label="Next image" data-carousel-next>
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="24" height="24" aria-hidden="true"><polyline points="9 18 15 12 9 6" /></svg>
+						</button>
+						<div class="art-carousel__dots">
+							{piece.images.map((_, i) => (
+								<button type="button" class="art-carousel__dot" aria-label={`Go to image ${i + 1}`} data-carousel-dot={i} aria-current={i === 0 ? "true" : undefined}></button>
+							))}
+						</div>
+					</div>
+				) : (
+					<img
+						src={withBase(`/images/${piece.image}.webp`)}
+						alt={piece.title}
+						decoding="async"
+						class="art-modal__img"
+					/>
+				)}
 			</div>
 			<div class="art-modal__body">
 				<h2 class="art-modal__title">{piece.uppercaseTitle ? piece.title.toUpperCase() : piece.title}</h2>
 				<div class="art-modal__meta">
-					{piece.medium && <p class="art-modal__medium">{piece.medium}</p>}
+					{piece.medium && <p class={`art-modal__medium${piece.mediumNormalCase ? " art-modal__medium--normal" : ""}`}>{piece.medium}</p>}
 					<div class="gold-rule"></div>
 					{!piece.hideAvailability && (
 						<p class="art-modal__availability">
-							{piece.available ? "Available for purchase" : "Not currently available for purchase"}
+							{piece.availabilityText
+								? piece.availabilityText
+								: piece.available
+									? "Available for purchase"
+									: "Not currently available for purchase"}
 						</p>
 					)}
 				</div>

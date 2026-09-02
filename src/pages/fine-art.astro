@@ -3,27 +3,21 @@ import Base from "../layouts/Base.astro";
 import Gallery from "../components/Gallery.astro";
 import artwork from "../data/artwork.json";
 
-const groups = artwork.categories
-	.map((cat) => ({
-		...cat,
-		pieces: artwork.pieces.filter((p) => p.category === cat.slug),
-	}))
-	.filter((g) => g.pieces.length > 0);
+const fineArt = artwork.pieces.filter((p) => p.category === "fine-art");
 ---
 
 <Base
-	title="All Artwork"
-	description="Browse the full collection of Matthew Peiper's commercial illustration, brand artwork, and fine art."
+	title="Fine Art"
+	description="Original fine art by Matthew Peiper — graphite studies and drawings available for purchase."
 >
 	<div class="artwork-page">
-		{groups.map((g, i) => (
-			<Gallery
-				sectionClass={i % 2 === 0 ? "commercial-work" : "fine-art"}
-				label="Full Collection"
-				heading={g.label}
-				pieces={g.pieces}
-			/>
-		))}
+		<Gallery
+			id="fine-art"
+			sectionClass="fine-art"
+			label="Originals"
+			heading="Fine Art"
+			pieces={fineArt}
+		/>
 	</div>
 </Base>
 
@@ -97,6 +91,7 @@ const groups = artwork.categories
 			}),
 		);
 	});
+
 	backdrop.addEventListener("click", () => {
 		const open = document.querySelector<HTMLElement>(".art-modal--open");
 		if (open) closeModal(open);

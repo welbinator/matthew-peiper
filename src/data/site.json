@@ -5,6 +5,7 @@
   "nav": [
     { "label": "Home", "url": "/" },
     { "label": "Commercial Art", "url": "/#commercial-art" },
+    { "label": "Fine Art", "url": "/fine-art" },
     { "label": "All Artwork", "url": "/artwork" },
     { "label": "Contact", "url": "/#contact" }
   ]

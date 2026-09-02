@@ -180,6 +180,35 @@ const pieces = commercial;
 		});
 	});
 
+	// ── Image carousels inside modals ──
+	document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((car) => {
+		const slides = Array.from(car.querySelectorAll<HTMLElement>(".art-carousel__slide"));
+		const dots = Array.from(car.querySelectorAll<HTMLElement>("[data-carousel-dot]"));
+		if (slides.length < 2) return;
+		let cur = 0;
+		const show = (n: number) => {
+			cur = (n + slides.length) % slides.length;
+			slides.forEach((s, i) => (s.hidden = i !== cur));
+			dots.forEach((d, i) =>
+				i === cur ? d.setAttribute("aria-current", "true") : d.removeAttribute("aria-current"),
+			);
+		};
+		car.querySelector("[data-carousel-prev]")?.addEventListener("click", (e) => {
+			e.stopPropagation();
+			show(cur - 1);
+		});
+		car.querySelector("[data-carousel-next]")?.addEventListener("click", (e) => {
+			e.stopPropagation();
+			show(cur + 1);
+		});
+		dots.forEach((d, i) =>
+			d.addEventListener("click", (e) => {
+				e.stopPropagation();
+				show(i);
+			}),
+		);
+	});
+
 	backdrop.addEventListener("click", () => {
 		const open = document.querySelector<HTMLElement>(".art-modal--open");
 		if (open) closeModal(open);

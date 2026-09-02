@@ -1,8 +1,17 @@
 {
   "categories": [
-    { "slug": "commercial-work", "label": "Commercial Work" },
-    { "slug": "featured-work", "label": "Featured Work" },
-    { "slug": "fine-art", "label": "Fine Art" }
+    {
+      "slug": "commercial-work",
+      "label": "Commercial Work"
+    },
+    {
+      "slug": "featured-work",
+      "label": "Featured Work"
+    },
+    {
+      "slug": "fine-art",
+      "label": "Fine Art"
+    }
   ],
   "pieces": [
     {
@@ -14,21 +23,21 @@
     },
     {
       "slug": "flexzilla-hose-display",
-      "title": "FlexZilla \u2013 Hose Display",
+      "title": "FlexZilla – Hose Display",
       "image": "flexzilla-hose-display",
       "category": "commercial-work",
       "available": false
     },
     {
       "slug": "flexzilla-product-line",
-      "title": "FlexZilla \u2013 Product Line",
+      "title": "FlexZilla – Product Line",
       "image": "flexzilla-product-line",
       "category": "commercial-work",
       "available": false
     },
     {
       "slug": "flexzilla-water",
-      "title": "FlexZilla \u2013 Water",
+      "title": "FlexZilla – Water",
       "image": "flexzilla-water",
       "category": "commercial-work",
       "available": false
@@ -70,10 +79,52 @@
       "slug": "switchboard",
       "title": "The Game of Switchboard",
       "image": "switchboard",
+      "images": [
+        "switchboard",
+        "switchboard-shot2",
+        "switchboard-shot3",
+        "switchboard-shot4",
+        "switchboard-shot5"
+      ],
       "category": "commercial-work",
-      "medium": "Product branding and packaging design for The Game of Switchboard \u2014 a compelling mix of chaos, strategy, and convenient alliances.",
+      "medium": "Product branding and packaging design for The Game of Switchboard — a compelling mix of chaos, strategy, and convenient alliances.",
+      "mediumNormalCase": true,
       "available": false,
       "hideAvailability": true
+    },
+    {
+      "slug": "skull-study-1",
+      "title": "Skull Study 1",
+      "image": "skull-study-1",
+      "category": "fine-art",
+      "medium": "Graphite on Paper · 18″ × 24″",
+      "mediumNormalCase": true,
+      "available": true,
+      "availabilityText": "Available: $250 + Shipping, VAT, Customs, Tax, etc."
+    },
+    {
+      "slug": "skull-study-2",
+      "title": "Skull Study 2",
+      "image": "skull-study-2",
+      "category": "fine-art",
+      "medium": "Graphite on Paper · 18″ × 24″",
+      "mediumNormalCase": true,
+      "available": true,
+      "availabilityText": "Available: $250 + Shipping, VAT, Customs, Tax, etc."
+    },
+    {
+      "slug": "skull-study-3",
+      "title": "Skull Study 3",
+      "image": "skull-study-3",
+      "images": [
+        "skull-study-3",
+        "skull-study-3-2"
+      ],
+      "category": "fine-art",
+      "medium": "Graphite on Paper · 18″ × 24″",
+      "mediumNormalCase": true,
+      "available": true,
+      "availabilityText": "Available: $250 + Shipping, VAT, Customs, Tax, etc."
     }
   ]
 }
